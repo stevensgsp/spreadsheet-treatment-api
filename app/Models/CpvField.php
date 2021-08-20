@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WinningCompany extends Model
+class CpvField extends Model
 {
     /**
      * {@inheritdoc}

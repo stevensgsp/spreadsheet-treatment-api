@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\SpreadsheetController;
+use App\Http\Controllers\TenderController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,7 +14,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('spreadsheets')->group(function () {
-    // process an spreadsheet
-    Route::post('/process', [SpreadsheetController::class, 'process']);
+Route::prefix('tenders')->group(function () {
+    // import tenders
+    Route::post('/import', [TenderController::class, 'import']);
+
+    // index of tenders
+    Route::get('/', [TenderController::class, 'index']);
+
+    // show a tender
+    Route::get('/{tenderId}', [TenderController::class, 'show']);
+
+    // check if tender was read
+    Route::get('/{tenderId}/was-read', [TenderController::class, 'wasRead']);
 });
