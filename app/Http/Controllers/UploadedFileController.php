@@ -3,18 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UploadedFileResource;
-use App\Models\UploadedFile;
-use Illuminate\Http\Request;
+use App\Repositories\UploadedFileRepository;
 
 class UploadedFileController extends Controller
 {
+    /**
+     * Creates a new class instance.
+     *
+     * @return void
+     */
+    public function __construct(UploadedFileRepository $uploadedFileRepo)
+    {
+        $this->uploadedFileRepository = $uploadedFileRepo;
+    }
+
     /**
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
         // get uploaded files
-        $uploadedFiles = UploadedFile::paginate();
+        $uploadedFiles = $this->uploadedFileRepository->paginate();
 
         return UploadedFileResource::collection($uploadedFiles);
     }
@@ -26,7 +35,7 @@ class UploadedFileController extends Controller
     public function show($uploadedFileId)
     {
         // get the uploaded file
-        $uploadedFile = UploadedFile::findOrFail($uploadedFileId);
+        $uploadedFile = $this->uploadedFileRepository->findOrFail($uploadedFileId);
 
         return new UploadedFileResource($uploadedFile);
     }
