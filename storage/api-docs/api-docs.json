@@ -1,0 +1,435 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Spreadsheet Treatment API",
+        "version": "1.0"
+    },
+    "servers": [
+        {
+            "url": "http://spreadsheet-treatment-api.local",
+            "description": "Server"
+        }
+    ],
+    "paths": {
+        "/api/tenders/import": {
+            "post": {
+                "tags": [
+                    "Tenders"
+                ],
+                "summary": "Import tenders.",
+                "operationId": "import",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "spreadsheet": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UploadedFileResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "The given data was invalid."
+                    }
+                }
+            }
+        },
+        "/api/tenders": {
+            "get": {
+                "tags": [
+                    "Tenders"
+                ],
+                "summary": "Index of tenders.",
+                "operationId": "index",
+                "parameters": [
+                    {
+                        "name": "filter[contract_signing_date]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "2016/01/06,2016/01/06"
+                    },
+                    {
+                        "name": "filter[contract_price]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "3001,7000"
+                    },
+                    {
+                        "name": "filter[winning_company_id]",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "1223"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/TendersResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tenders/{tenderId}": {
+            "get": {
+                "tags": [
+                    "Tenders"
+                ],
+                "summary": "Show a tender.",
+                "operationId": "show",
+                "parameters": [
+                    {
+                        "name": "tenderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/TenderResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found."
+                    }
+                }
+            }
+        },
+        "/api/tenders/{tenderId}/was-read": {
+            "get": {
+                "tags": [
+                    "Tenders"
+                ],
+                "summary": "Check if tender was read.",
+                "operationId": "wasRead",
+                "parameters": [
+                    {
+                        "name": "tenderId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "meta": {
+                                            "properties": {
+                                                "was-read": {
+                                                    "type": "boolean"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found."
+                    }
+                }
+            }
+        },
+        "/api/uploaded-files": {
+            "get": {
+                "tags": [
+                    "Uploaded Files"
+                ],
+                "summary": "Index of uploaded files.",
+                "operationId": "index",
+                "responses": {
+                    "200": {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/UploadedFileResource"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/uploaded-files/{uploadedFileId}": {
+            "get": {
+                "tags": [
+                    "Uploaded Files"
+                ],
+                "summary": "Show an uploaded file.",
+                "operationId": "show",
+                "parameters": [
+                    {
+                        "name": "uploadedFileId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/UploadedFileResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not found."
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "TenderResource": {
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "attributes": {
+                        "required": [
+                            "contract_id",
+                            "ad_number",
+                            "contract_type",
+                            "tender_type",
+                            "contract_target",
+                            "publication_date",
+                            "contract_signing_date",
+                            "contract_price",
+                            "cpv_field",
+                            "execution_time",
+                            "execution_place",
+                            "legal_bases",
+                            "adjudicators",
+                            "winningCompanies",
+                            "cpvFields",
+                            "executionPlaces",
+                            "contractTypes"
+                        ],
+                        "properties": {
+                            "contract_id": {
+                                "type": "string"
+                            },
+                            "ad_number": {
+                                "type": "string"
+                            },
+                            "contract_type": {
+                                "type": "string"
+                            },
+                            "tender_type": {
+                                "type": "string"
+                            },
+                            "contract_target": {
+                                "type": "string"
+                            },
+                            "publication_date": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "contract_signing_date": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "contract_price": {
+                                "type": "float"
+                            },
+                            "cpv_field": {
+                                "type": "string"
+                            },
+                            "execution_time": {
+                                "type": "string"
+                            },
+                            "execution_place": {
+                                "type": "string"
+                            },
+                            "legal_bases": {
+                                "type": "string"
+                            },
+                            "adjudicators": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "winningCompanies": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "cpvFields": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "executionPlaces": {
+                                "type": "array",
+                                "items": {}
+                            },
+                            "contractTypes": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "TendersResource": {
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "attributes": {
+                        "required": [
+                            "contract_signing_date",
+                            "contract_price",
+                            "winningCompanies"
+                        ],
+                        "properties": {
+                            "contract_signing_date": {
+                                "type": "string",
+                                "format": "date-time"
+                            },
+                            "contract_price": {
+                                "type": "float"
+                            },
+                            "winningCompanies": {
+                                "type": "array",
+                                "items": {}
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "UploadedFileResource": {
+                "properties": {
+                    "type": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string",
+                        "format": "binary"
+                    },
+                    "attributes": {
+                        "required": [
+                            "name",
+                            "mime_type",
+                            "size",
+                            "status"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "mime_type": {
+                                "type": "string"
+                            },
+                            "size": {
+                                "type": "string"
+                            },
+                            "status": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "security": [
+        []
+    ]
+}

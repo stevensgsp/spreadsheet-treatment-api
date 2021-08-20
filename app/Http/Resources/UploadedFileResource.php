@@ -4,6 +4,26 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @OA\Schema(
+ *     schema="UploadedFileResource",
+ *     @OA\Property(property="type", type="string"),
+ *     @OA\Property(property="id", type="string", format="binary"),
+ *     @OA\Property(property="attributes",
+ *         type="object",
+ *         required={
+ *             "name",
+ *             "mime_type",
+ *             "size",
+ *             "status"
+ *         },
+ *         @OA\Property(property="name", type="string"),
+ *         @OA\Property(property="mime_type", type="string"),
+ *         @OA\Property(property="size", type="string"),
+ *         @OA\Property(property="status", type="string")
+ *     )
+ * )
+ */
 class UploadedFileResource extends JsonResource
 {
     /**

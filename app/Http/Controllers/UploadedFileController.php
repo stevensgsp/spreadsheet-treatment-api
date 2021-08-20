@@ -19,6 +19,20 @@ class UploadedFileController extends Controller
 
     /**
      * @return \Illuminate\Http\Response
+     *
+     * @OA\Get(
+     *     path="/api/uploaded-files",
+     *     operationId="index",
+     *     tags={"Uploaded Files"},
+     *     summary="Index of uploaded files.",
+     *
+     *     @OA\Response(response=200, description="Success.", @OA\JsonContent(
+     *         type="object",
+     *         @OA\Property(property="data", type="array", @OA\Items(
+     *             ref="#/components/schemas/UploadedFileResource"
+     *         ))
+     *     ))
+     * )
      */
     public function index()
     {
@@ -31,6 +45,20 @@ class UploadedFileController extends Controller
     /**
      * @param  mixed  $uploadedFileId
      * @return \Illuminate\Http\Response
+     *
+     * @OA\Get(
+     *     path="/api/uploaded-files/{uploadedFileId}",
+     *     operationId="show",
+     *     tags={"Uploaded Files"},
+     *     summary="Show an uploaded file.",
+     *     @OA\Parameter(name="uploadedFileId", required=true, in="path", @OA\Schema(type="string")),
+     *
+     *     @OA\Response(response=200, description="Success.", @OA\JsonContent(
+     *         type="object",
+     *         @OA\Property(property="data", ref="#/components/schemas/UploadedFileResource")
+     *     )),
+     *     @OA\Response(response=404, description="Not found.")
+     * )
      */
     public function show($uploadedFileId)
     {
