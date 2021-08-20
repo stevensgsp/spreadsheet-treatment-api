@@ -3,21 +3,26 @@
 namespace App\Imports;
 
 use App\Imports\Contracts\HasTenderImportFields;
+use App\Jobs\UpdateUploadedFileStatus;
 use App\Models\Adjudicator;
 use App\Models\ContractType;
 use App\Models\CpvField;
 use App\Models\Place;
 use App\Models\Tender;
+use App\Models\UploadedFile;
 use App\Models\WinningCompany;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Events\BeforeImport;
+use Maatwebsite\Excel\Events\ImportFailed;
 use Maatwebsite\Excel\Row;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 
@@ -25,6 +30,8 @@ class TenderImport implements
     OnEachRow,
     WithHeadingRow,
     WithChunkReading,
+    WithEvents,
+    WithValidation,
     ShouldQueue,
     HasTenderImportFields
 {
@@ -38,6 +45,21 @@ class TenderImport implements
     protected $chunkSize = 1000;
 
     /**
+     * @var \App\Models\UploadedFile
+     */
+    protected $uploadedFile;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct(UploadedFile $uploadedFile)
+    {
+        $this->uploadedFile = $uploadedFile;
+    }
+
+    /**
      * Fill the model with data.
      *
      * @param  \Maatwebsite\Excel\Row  $row
@@ -47,9 +69,6 @@ class TenderImport implements
     {
         // get row as an array
         $arrayRow = $row->toArray();
-
-        // validate row data
-        $this->validate($arrayRow);
 
         // find or store the tender
         $tender = $this->getTender($arrayRow);
@@ -111,6 +130,7 @@ class TenderImport implements
             'contract_price'        => $row[self::CONTRACT_PRICE],
             'execution_time'        => $row[self::EXECUTION_TIME],
             'legal_bases'           => $row[self::LEGAL_BASES],
+            'uploaded_file_id'      => $this->uploadedFile->id,
         ];
     }
 
@@ -165,14 +185,33 @@ class TenderImport implements
     }
 
     /**
-     * Validate the import data.
+     * Prepare the data for validation.
+     *
+     * @param  mixed  $data
+     * @param  mixed  $index
+     * @return mixed
+     */
+    public function prepareForValidation($data, $index)
+    {
+        foreach ($data as $key => $value) {
+            // parse 'NULL' values to null
+            if ($value === 'NULL') {
+                $data[$key] = null;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Get the validation rules that apply to the import.
      *
      * @param array  $row
      * @return void
      */
-    public function validate(array $row): void
+    public function rules(): array
     {
-         Validator::make($row, [
+        return [
             self::CONTRACT_ID           => ['required'],
             self::AD_NUMBER             => ['present'],
             self::CONTRACT_TYPE         => ['present'],
@@ -187,7 +226,7 @@ class TenderImport implements
             self::EXECUTION_TIME        => ['present'],
             self::EXECUTION_PLACE       => ['present'],
             self::LEGAL_BASES           => ['present'],
-         ])->validate();
+        ];
     }
 
     /**
@@ -198,5 +237,25 @@ class TenderImport implements
     public function chunkSize(): int
     {
         return $this->chunkSize;
+    }
+
+    /**
+     * Register events for import.
+     *
+     * @return array
+     */
+    public function registerEvents(): array
+    {
+        return [
+            BeforeImport::class => function (BeforeImport $event) {
+                // set processing status
+                UpdateUploadedFileStatus::dispatch($this->uploadedFile, config('statuses.processing'));
+            },
+
+            ImportFailed::class => function (ImportFailed $event) {
+                // set failed status
+                UpdateUploadedFileStatus::dispatch($this->uploadedFile, config('statuses.failed'));
+            },
+        ];
     }
 }

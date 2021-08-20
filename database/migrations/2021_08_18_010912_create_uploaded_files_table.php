@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateContractTypeTenderTable extends Migration
+class CreateUploadedFilesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,13 @@ class CreateContractTypeTenderTable extends Migration
      */
     public function up()
     {
-        Schema::create('contract_type_tender', function (Blueprint $table) {
+        Schema::create('uploaded_files', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('contract_type_id')->constrained()->onDelete('cascade'); // tipocontrato
-            $table->foreignId('tender_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->string('mime_type');
+            $table->string('size')->comment('In bytes.');
+            $table->string('status')->comment('Possible values: processing | successful | failed');
 
             $table->timestamps();
         });
@@ -30,6 +32,6 @@ class CreateContractTypeTenderTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('contract_type_tender');
+        Schema::dropIfExists('uploaded_files');
     }
 }

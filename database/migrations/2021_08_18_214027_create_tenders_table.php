@@ -29,6 +29,8 @@ class CreateTendersTable extends Migration
 
             $table->timestamp('read_at')->nullable()->default(null);
 
+            $table->foreignId('uploaded_file_id')->constrained();
+
             $table->timestamps();
         });
     }

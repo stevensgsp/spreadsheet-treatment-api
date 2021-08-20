@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TenderResource;
 use App\Http\Resources\TendersResource;
+use App\Http\Resources\UploadedFileResource;
 use App\Imports\TenderImport;
+use App\Jobs\UpdateUploadedFileStatus;
 use App\Models\Tender;
+use App\Models\UploadedFile;
 use App\Models\WinningCompany;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile as UploadedFileHttp;
 
 class TenderController extends Controller
 {
@@ -20,12 +24,13 @@ class TenderController extends Controller
         // get file
         $file = $request->file('spreadsheet');
 
-        // import tenders from file (in queues)
-        (new TenderImport())->import($file);
+        // create UploadedFile model
+        $uploadedFile = $this->createUploadedFile($file);
 
-        return [
-            'meta' => ['success' => true]
-        ];
+        // import tenders from file (in queues)
+        $this->importTenders($file, $uploadedFile);
+
+        return new UploadedFileResource($uploadedFile);
     }
 
     /**
@@ -97,5 +102,35 @@ class TenderController extends Controller
 
         // apply filters and return the query instance
         return $query->applyFilters($filters)->orderByDesc('created_at');
+    }
+
+    /**
+     * Create a UploadedFile model.
+     *
+     * @param  \App\Http\Controllers\UploadedFile  $file
+     * @return \App\Models\UploadedFile
+     */
+    protected function createUploadedFile(UploadedFileHttp $file): UploadedFile
+    {
+        return UploadedFile::create([
+            'name'      => $file->getClientOriginalName(),
+            'mime_type' => $file->getClientMimeType(),
+            'size'      => $file->getSize(),
+            'status'    => config('statuses.queued'),
+        ]);
+    }
+
+    /**
+     * Import tenders.
+     *
+     * @param  \Illuminate\Http\UploadedFile  $file
+     * @param  \App\Models\UploadedFile  $uploadedFile
+     * @return void
+     */
+    protected function importTenders($file, $uploadedFile): void
+    {
+        (new TenderImport($uploadedFile))->queue($file)->chain([
+            new UpdateUploadedFileStatus($uploadedFile),
+        ]);
     }
 }

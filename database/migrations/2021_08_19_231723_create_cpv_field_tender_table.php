@@ -16,8 +16,8 @@ class CreateCpvFieldTenderTable extends Migration
         Schema::create('cpv_field_tender', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('cpv_field_id')->constrained(); // cpv
-            $table->foreignId('tender_id')->constrained();
+            $table->foreignId('cpv_field_id')->constrained()->onDelete('cascade'); // cpv
+            $table->foreignId('tender_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();
         });

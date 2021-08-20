@@ -16,8 +16,8 @@ class CreatePlaceTenderTable extends Migration
         Schema::create('place_tender', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('place_id')->constrained(); // localexecucao
-            $table->foreignId('tender_id')->constrained();
+            $table->foreignId('place_id')->constrained()->onDelete('cascade'); // localexecucao
+            $table->foreignId('tender_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();
         });

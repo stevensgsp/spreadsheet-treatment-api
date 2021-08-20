@@ -16,8 +16,8 @@ class CreateAdjudicatorTenderTable extends Migration
         Schema::create('adjudicator_tender', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('adjudicator_id')->constrained(); // adjudicantes
-            $table->foreignId('tender_id')->constrained();
+            $table->foreignId('adjudicator_id')->constrained()->onDelete('cascade'); // adjudicantes
+            $table->foreignId('tender_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();
         });

@@ -16,8 +16,8 @@ class CreateTenderWinningCompanyTable extends Migration
         Schema::create('tender_winning_company', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('winning_company_id')->constrained(); // adjudicatarios
-            $table->foreignId('tender_id')->constrained();
+            $table->foreignId('winning_company_id')->constrained()->onDelete('cascade'); // adjudicatarios
+            $table->foreignId('tender_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();
         });

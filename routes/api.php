@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\TenderController;
+use App\Http\Controllers\UploadedFileController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,4 +27,12 @@ Route::prefix('tenders')->group(function () {
 
     // check if tender was read
     Route::get('/{tenderId}/was-read', [TenderController::class, 'wasRead']);
+});
+
+Route::prefix('uploaded-files')->group(function () {
+    // index of uploaded files
+    Route::get('/', [UploadedFileController::class, 'index']);
+
+    // show an uploaded file
+    Route::get('/{uploadedFileId}', [UploadedFileController::class, 'show']);
 });
